@@ -344,7 +344,61 @@ def name_list_to_method_list(property_string):
     return method_list
 
 
-import random_relations
+# def generate_relation_with_properties_with_rejection(
+#     universe=None,
+#     universe_size=None,
+#     universe_superset=None,
+#     target_size=None,
+#     min_target_size=None,
+#     max_target_size=None,
+#     epsilon=0.0,
+#     property_string="",
+#     sort_result=True,
+# ):
+
+#     # Determine the universe if it is not provided
+#     if not universe:
+#         if universe_size:
+#             if universe_superset:
+#                 universe = random.sample(
+#                     universe_superset, min(universe_size, len(universe_superset))
+#                 )
+#             else:
+#                 universe = list(
+#                     range(universe_size)
+#                 )  # Generate a simple numeric universe
+#         else:
+#             if not universe_superset:
+#                 raise ValueError("Universe size or superset must be provided")
+#             universe = universe_superset
+
+#     # Adjust target size based on min/max or epsilon
+#     if target_size:
+#         min_target_size = int(target_size * (1 - epsilon))
+#         max_target_size = int(target_size * (1 + epsilon))
+#     # elif not min_target_size and not max_target_size:
+#     #     raise ValueError("Target size or min/max target size must be specified")
+
+#     # Parse the properties to form the rejection methods
+#     method_list = name_list_to_method_list(property_string)
+#     # pin_method_list_universe = lambda methods: [
+#     #     lambda relation: method(relation, universe) for method in methods
+#     # ]
+#     rejection_methods = pin_method_list_universe(method_list, universe=universe)
+
+#     # Generate the relation
+#     relation = random_relations.generate_uniform_random_relation_with_rejection(
+#         universe,
+#         rejection_methods=rejection_methods,
+#         min_target_size=min_target_size,
+#         max_target_size=max_target_size,
+#     )
+
+#     # Optionally sort the relation
+#     if sort_result:
+#         relation = sorted(relation)
+
+#     return relation
 
 
 def generate_relation_with_properties(
@@ -358,7 +412,6 @@ def generate_relation_with_properties(
     property_string="",
     sort_result=True,
 ):
-
     # Determine the universe if it is not provided
     if not universe:
         if universe_size:
@@ -368,7 +421,7 @@ def generate_relation_with_properties(
                 )
             else:
                 universe = list(
-                    range(universe_size)
+                    range(1, universe_size + 1)
                 )  # Generate a simple numeric universe
         else:
             if not universe_superset:
@@ -379,26 +432,65 @@ def generate_relation_with_properties(
     if target_size:
         min_target_size = int(target_size * (1 - epsilon))
         max_target_size = int(target_size * (1 + epsilon))
-    # elif not min_target_size and not max_target_size:
-    #     raise ValueError("Target size or min/max target size must be specified")
+    elif not min_target_size and not max_target_size:
+        raise ValueError("Target size or min/max target size must be specified")
 
-    # Parse the properties to form the rejection methods
-    method_list = name_list_to_method_list(property_string)
-    # pin_method_list_universe = lambda methods: [
-    #     lambda relation: method(relation, universe) for method in methods
-    # ]
-    rejection_methods = pin_method_list_universe(method_list, universe=universe)
-
-    # Generate the relation
-    relation = random_relations.generate_uniform_random_relation_with_rejection(
-        universe,
-        rejection_methods=rejection_methods,
-        min_target_size=min_target_size,
-        max_target_size=max_target_size,
+    # Initially generate a random relation
+    all_possible_pairs = list(itertools.product(universe, repeat=2))
+    num_pairs = random.randint(
+        min_target_size or 0, max_target_size or len(all_possible_pairs)
     )
+    relation = random.sample(all_possible_pairs, num_pairs)
+
+    # Parse the properties
+    properties = property_string.split(",")
+    for property in properties:
+        property = property.strip().lower()
+        negate = property.startswith("!")
+        if negate:
+            property = property[1:]
+
+        if property == "reflexive":
+            if not random_relations.is_reflexive(relation, universe):
+                relation.extend(
+                    random_relations.find_missing_pairs_to_reflexive(relation, universe)
+                )
+        elif property == "symmetric":
+            if not random_relations.is_symmetric(relation, universe):
+                relation.extend(
+                    random_relations.find_missing_pairs_to_symmetric(relation, universe)
+                )
+        elif property == "transitive":
+            if not random_relations.is_transitive(relation, universe):
+                relation.extend(
+                    random_relations.find_missing_pairs_to_transitive(
+                        relation, universe
+                    )
+                )
+        elif property == "asymmetric":
+            if random_relations.is_assymetric(relation, universe):
+                for pair in random_relations.find_conflict_pairs_for_asymmetry(
+                    relation
+                ):
+                    if pair in relation:
+                        relation.remove(pair)
+        elif property == "antisymmetric":
+            if random_relations.is_antisymmetric(relation, universe):
+                for pair in random_relations.find_conflict_pairs_for_antisymmetry(
+                    relation
+                ):
+                    if pair in relation:
+                        relation.remove(pair)
+        elif property == "irreflexive":
+            if random_relations.is_irreflexive(relation, universe):
+                for pair in random_relations.find_conflict_pairs_for_irreflexivity(
+                    relation
+                ):
+                    if pair in relation:
+                        relation.remove(pair)
 
     # Optionally sort the relation
     if sort_result:
-        relation = sorted(relation)
+        relation = sorted(set(relation))  # Remove duplicates and sort
 
     return relation
