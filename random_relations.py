@@ -310,14 +310,14 @@ def name_list_to_method_list(property_string):
 
     # Define a dictionary to map property names to their corresponding methods
     property_to_method = {
-        "reflexive": random_relations.is_reflexive,
-        "symmetric": random_relations.is_symmetric,
-        "transitive": random_relations.is_transitive,
-        "asymmetric": random_relations.is_assymetric,
-        "antisymmetric": random_relations.is_antisymmetric,
-        "irreflexive": random_relations.is_irreflexive,
-        "equivalence": random_relations.is_equivalence_relation,
-        "order": random_relations.is_order_relation,
+        "reflexive": is_reflexive,
+        "symmetric": is_symmetric,
+        "transitive": is_transitive,
+        "asymmetric": is_assymetric,
+        "antisymmetric": is_antisymmetric,
+        "irreflexive": is_irreflexive,
+        "equivalence": is_equivalence_relation,
+        "order": is_order_relation,
     }
 
     # Process each property name
@@ -387,7 +387,7 @@ def name_list_to_method_list(property_string):
 #     rejection_methods = pin_method_list_universe(method_list, universe=universe)
 
 #     # Generate the relation
-#     relation = random_relations.generate_uniform_random_relation_with_rejection(
+#     relation = generate_uniform_random_relation_with_rejection(
 #         universe,
 #         rejection_methods=rejection_methods,
 #         min_target_size=min_target_size,
@@ -451,41 +451,27 @@ def generate_relation_with_properties(
             property = property[1:]
 
         if property == "reflexive":
-            if not random_relations.is_reflexive(relation, universe):
-                relation.extend(
-                    random_relations.find_missing_pairs_to_reflexive(relation, universe)
-                )
+            if not is_reflexive(relation, universe):
+                relation.extend(find_missing_pairs_to_reflexive(relation, universe))
         elif property == "symmetric":
-            if not random_relations.is_symmetric(relation, universe):
-                relation.extend(
-                    random_relations.find_missing_pairs_to_symmetric(relation, universe)
-                )
+            if not is_symmetric(relation, universe):
+                relation.extend(find_missing_pairs_to_symmetric(relation, universe))
         elif property == "transitive":
-            if not random_relations.is_transitive(relation, universe):
-                relation.extend(
-                    random_relations.find_missing_pairs_to_transitive(
-                        relation, universe
-                    )
-                )
+            if not is_transitive(relation, universe):
+                relation.extend(find_missing_pairs_to_transitive(relation, universe))
         elif property == "asymmetric":
-            if random_relations.is_assymetric(relation, universe):
-                for pair in random_relations.find_conflict_pairs_for_asymmetry(
-                    relation
-                ):
+            if is_assymetric(relation, universe):
+                for pair in find_conflict_pairs_for_asymmetry(relation):
                     if pair in relation:
                         relation.remove(pair)
         elif property == "antisymmetric":
-            if random_relations.is_antisymmetric(relation, universe):
-                for pair in random_relations.find_conflict_pairs_for_antisymmetry(
-                    relation
-                ):
+            if is_antisymmetric(relation, universe):
+                for pair in find_conflict_pairs_for_antisymmetry(relation):
                     if pair in relation:
                         relation.remove(pair)
         elif property == "irreflexive":
-            if random_relations.is_irreflexive(relation, universe):
-                for pair in random_relations.find_conflict_pairs_for_irreflexivity(
-                    relation
-                ):
+            if is_irreflexive(relation, universe):
+                for pair in find_conflict_pairs_for_irreflexivity(relation):
                     if pair in relation:
                         relation.remove(pair)
 
