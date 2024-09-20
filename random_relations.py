@@ -128,14 +128,16 @@ def is_transitive(relation, universe):
     )
 
 
-def is_assymetric(relation, universe):
+def is_asymmetric(relation, universe):
     relation_set = set(relation)
-    return all((b, a) not in relation_set for a, b in relation_set if a != b)
+    return is_irreflexive(relation, universe) and all(
+        (b, a) not in relation_set for a, b in relation_set
+    )
 
 
 def is_antisymmetric(relation, universe):
     relation_set = set(relation)
-    return all((b, a) not in relation_set for a, b in relation_set if a != b)
+    return all(a == b or (b, a) not in relation_set for a, b in relation_set)
 
 
 def is_irreflexive(relation, universe):
@@ -194,7 +196,7 @@ def find_missing_pairs_to_transitive(relation, universe):
     return list(set(missing))  # Remove duplicates
 
 
-def find_missing_pairs_to_assymetric(relation, universe):
+def find_missing_pairs_to_asymmetric(relation, universe):
     relation_set = set(relation)
     missing = [(b, a) for a, b in relation_set if (b, a) in relation_set and a != b]
     return list(set(missing))
@@ -222,7 +224,7 @@ def find_conflict_pairs_for_asymmetry(relation):
 
 
 def find_conflict_pairs_for_irreflexivity(relation):
-    conflicts = [(a, a) for a, a in relation if a == a]
+    conflicts = [(a, a) for a, b in relation if a == b]
     return list(set(conflicts))
 
 
@@ -236,7 +238,7 @@ def pretty_print_relation_properties(
     reflexive = is_reflexive(relation, universe)
     symmetric = is_symmetric(relation, universe)
     transitive = is_transitive(relation, universe)
-    asymmetric = is_assymetric(relation, universe)
+    asymmetric = is_asymmetric(relation, universe)
     antisymmetric = is_antisymmetric(relation, universe)
     irreflexive = is_irreflexive(relation, universe)
     equivalence = is_equivalence_relation(relation, universe)
@@ -313,7 +315,7 @@ def name_list_to_method_list(property_string):
         "reflexive": is_reflexive,
         "symmetric": is_symmetric,
         "transitive": is_transitive,
-        "asymmetric": is_assymetric,
+        "asymmetric": is_asymmetric,
         "antisymmetric": is_antisymmetric,
         "irreflexive": is_irreflexive,
         "equivalence": is_equivalence_relation,
@@ -460,7 +462,7 @@ def generate_relation_with_properties(
             if not is_transitive(relation, universe):
                 relation.extend(find_missing_pairs_to_transitive(relation, universe))
         elif property == "asymmetric":
-            if not is_assymetric(relation, universe):
+            if not is_asymmetric(relation, universe):
                 for pair in find_conflict_pairs_for_asymmetry(relation):
                     if pair in relation:
                         relation.remove(pair)
