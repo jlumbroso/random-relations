@@ -384,10 +384,10 @@ def generate_relation_with_properties(
 
     # Parse the properties to form the rejection methods
     method_list = name_list_to_method_list(property_string)
-    pin_method_list_universe = lambda methods: [
-        lambda relation: method(relation, universe) for method in methods
-    ]
-    rejection_methods = pin_method_list_universe(method_list)
+    # pin_method_list_universe = lambda methods: [
+    #     lambda relation: method(relation, universe) for method in methods
+    # ]
+    rejection_methods = pin_method_list_universe(method_list, universe=universe)
 
     # Generate the relation
     relation = random_relations.generate_uniform_random_relation_with_rejection(
