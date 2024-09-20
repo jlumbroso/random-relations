@@ -196,14 +196,14 @@ def find_missing_pairs_to_transitive(relation, universe):
 
 def find_missing_pairs_to_assymetric(relation, universe):
     relation_set = set(relation)
-    conflicting = [(b, a) for a, b in relation_set if (b, a) in relation_set and a != b]
-    return conflicting
+    missing = [(b, a) for a, b in relation_set if (b, a) in relation_set and a != b]
+    return list(set(missing))
 
 
 def find_missing_pairs_to_antisymmetric(relation, universe):
     relation_set = set(relation)
-    conflicting = [(b, a) for a, b in relation_set if (b, a) in relation_set and a != b]
-    return conflicting
+    missing = [(b, a) for a, b in relation_set if (b, a) in relation_set and a != b]
+    return list(set(missing))
 
 
 ## FINDING CONFLICTING PAIRS
@@ -212,18 +212,18 @@ def find_missing_pairs_to_antisymmetric(relation, universe):
 def find_conflict_pairs_for_antisymmetry(relation):
     relation_set = set(relation)
     conflicts = [(a, b) for a, b in relation_set if (b, a) in relation_set and a != b]
-    return conflicts
+    return list(set(conflicts))
 
 
 def find_conflict_pairs_for_asymmetry(relation):
     relation_set = set(relation)
     conflicts = [(a, b) for a, b in relation_set if (b, a) in relation_set]
-    return conflicts
+    return list(set(conflicts))
 
 
 def find_conflict_pairs_for_irreflexivity(relation):
     conflicts = [(a, a) for a, a in relation if a == a]
-    return conflicts
+    return list(set(conflicts))
 
 
 ## PRETTY PRINTING
@@ -271,15 +271,15 @@ def pretty_print_relation_properties(
 
     if include_conflicting_pairs:
         print()
-        if asymmetric:
+        if not asymmetric:
             conflicting_asymmetric = find_conflict_pairs_for_asymmetry(relation)
             print(f"    Conflicting pairs for asymmetry: {conflicting_asymmetric}")
-        if antisymmetric:
+        if not antisymmetric:
             conflicting_antisymmetric = find_conflict_pairs_for_antisymmetry(relation)
             print(
                 f"    Conflicting pairs for antisymmetry: {conflicting_antisymmetric}"
             )
-        if irreflexive:
+        if not irreflexive:
             conflicting_irreflexive = find_conflict_pairs_for_irreflexivity(relation)
             print(f"    Conflicting pairs for irreflexivity: {conflicting_irreflexive}")
 
@@ -460,17 +460,17 @@ def generate_relation_with_properties(
             if not is_transitive(relation, universe):
                 relation.extend(find_missing_pairs_to_transitive(relation, universe))
         elif property == "asymmetric":
-            if is_assymetric(relation, universe):
+            if not is_assymetric(relation, universe):
                 for pair in find_conflict_pairs_for_asymmetry(relation):
                     if pair in relation:
                         relation.remove(pair)
         elif property == "antisymmetric":
-            if is_antisymmetric(relation, universe):
+            if not is_antisymmetric(relation, universe):
                 for pair in find_conflict_pairs_for_antisymmetry(relation):
                     if pair in relation:
                         relation.remove(pair)
         elif property == "irreflexive":
-            if is_irreflexive(relation, universe):
+            if not is_irreflexive(relation, universe):
                 for pair in find_conflict_pairs_for_irreflexivity(relation):
                     if pair in relation:
                         relation.remove(pair)
